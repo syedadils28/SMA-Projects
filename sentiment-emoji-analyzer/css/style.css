@@ -1,0 +1,317 @@
+/* ==========================================================================
+   Sentiment Analyzer - Base & Design System (style.css)
+   ========================================================================== */
+
+:root {
+  /* Dark Theme Palette (Default) */
+  --bg-primary: #0B0F19;
+  --bg-secondary: #111827;
+  --bg-tertiary: #1F2937;
+  --bg-card: #161F30;
+  --bg-card-hover: #1E293B;
+  --border-color: #2D3748;
+  --border-subtle: #1F293D;
+  
+  /* Text & Inks */
+  --ink-primary: #F9FAFB;
+  --ink-secondary: #94A3B8;
+  --ink-muted: #64748B;
+  --ink-inverse: #0B0F19;
+  
+  /* Semantic Status Colors */
+  --positive: #10B981;
+  --positive-soft: rgba(16, 185, 129, 0.12);
+  --positive-border: rgba(16, 185, 129, 0.3);
+  
+  --negative: #EF4444;
+  --negative-soft: rgba(239, 68, 68, 0.12);
+  --negative-border: rgba(239, 68, 68, 0.3);
+  
+  --neutral: #64748B;
+  --neutral-soft: rgba(100, 116, 139, 0.12);
+  --neutral-border: rgba(100, 116, 139, 0.3);
+  
+  --warning: #F59E0B;
+  --warning-soft: rgba(245, 158, 11, 0.12);
+  --warning-border: rgba(245, 158, 11, 0.3);
+  
+  --primary: #4F46E5;
+  --primary-hover: #4338CA;
+  --primary-soft: rgba(79, 70, 229, 0.15);
+  --primary-gradient: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);
+  
+  /* Geometry & Elevation */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-full: 9999px;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 25px -5px rgba(79, 70, 229, 0.25);
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'JetBrains Mono', Consolas, monospace;
+}
+
+html[data-theme="light"] {
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #F1F5F9;
+  --bg-tertiary: #E2E8F0;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F8FAFC;
+  --border-color: #CBD5E1;
+  --border-subtle: #E2E8F0;
+  
+  --ink-primary: #0F172A;
+  --ink-secondary: #475569;
+  --ink-muted: #94A3B8;
+  --ink-inverse: #FFFFFF;
+  
+  --positive: #059669;
+  --positive-soft: rgba(5, 150, 105, 0.1);
+  --positive-border: rgba(5, 150, 105, 0.25);
+  
+  --negative: #DC2626;
+  --negative-soft: rgba(220, 38, 38, 0.1);
+  --negative-border: rgba(220, 38, 38, 0.25);
+  
+  --neutral: #64748B;
+  --neutral-soft: rgba(100, 116, 139, 0.1);
+  --neutral-border: rgba(100, 116, 139, 0.2);
+  
+  --warning: #D97706;
+  --warning-soft: rgba(217, 119, 6, 0.1);
+  --warning-border: rgba(217, 119, 6, 0.25);
+  
+  --primary: #4F46E5;
+  --primary-hover: #4338CA;
+  --primary-soft: rgba(79, 70, 229, 0.1);
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 20px -5px rgba(79, 70, 229, 0.15);
+}
+
+/* CSS Reset & Box Sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--ink-primary);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+textarea, input {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+/* Accessibility Focus States */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Section Common Headers */
+.section-header {
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.section-title {
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink-primary);
+}
+
+.section-subtitle {
+  color: var(--ink-secondary);
+  font-size: 1rem;
+  margin-top: 6px;
+  max-width: 65ch;
+}
+
+/* Sticky Header */
+header.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(11, 15, 25, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+html[data-theme="light"] header.site-header {
+  background: rgba(248, 250, 252, 0.88);
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink-primary);
+}
+
+.brand-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: var(--primary-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+}
+
+.nav-link {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  transition: color 0.15s ease;
+}
+
+.nav-link:hover {
+  color: var(--ink-primary);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  color: var(--ink-primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--bg-card-hover);
+  border-color: var(--ink-muted);
+}
+
+/* Footer */
+footer.site-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border-color);
+  padding: 36px 0;
+  background-color: var(--bg-secondary);
+  font-size: 0.875rem;
+  color: var(--ink-secondary);
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-disclaimer {
+  max-width: 60ch;
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+}

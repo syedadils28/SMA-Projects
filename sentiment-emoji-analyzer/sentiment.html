@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Moodline — Sentiment &amp; Emoji Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#121017;
+  --bg-2:#181521;
+  --surface:#1D1926;
+  --surface-2:#262130;
+  --border:#332D42;
+  --ink:#F4F0E9;
+  --muted:#A79FB4;
+  --muted-2:#7D758C;
+  --positive:#FF7A59;
+  --positive-soft:#402A25;
+  --negative:#6E8CFF;
+  --negative-soft:#232A45;
+  --neutral:#C9BFE0;
+  --neutral-soft:#2A2536;
+  --gold:#F5C56B;
+  --radius-lg:22px;
+  --radius-md:14px;
+  --radius-sm:9px;
+  --shadow:0 20px 60px -25px rgba(0,0,0,.6);
+  --font-display:'Fraunces', serif;
+  --font-body:'Inter', sans-serif;
+  --font-mono:'IBM Plex Mono', monospace;
+}
+html[data-theme="light"]{
+  --bg:#F6F2EA;
+  --bg-2:#EFE9DD;
+  --surface:#FFFFFF;
+  --surface-2:#F1ECE1;
+  --border:#E1D9C8;
+  --ink:#221F2B;
+  --muted:#6B6478;
+  --muted-2:#948C9E;
+  --positive-soft:#FDE3D6;
+  --negative-soft:#DEE4FF;
+  --neutral-soft:#EDE8F5;
+  --shadow:0 20px 50px -30px rgba(30,20,10,.35);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:radial-gradient(120% 100% at 15% -10%, var(--bg-2), var(--bg) 55%);
+  color:var(--ink);
+  font-family:var(--font-body);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  transition:background .4s ease,color .4s ease;
+}
+@media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important; transition-duration:.001ms !important;} }
+a{color:inherit;}
+h1,h2,h3{font-family:var(--font-display); margin:0; letter-spacing:-.01em;}
+.eyebrow{font-family:var(--font-mono); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted-2);}
+.container{max-width:1180px; margin:0 auto; padding:0 28px;}
+button{font-family:var(--font-body); cursor:pointer;}
+textarea,input{font-family:var(--font-body);}
+
+/* Header */
+header{position:sticky; top:0; z-index:50; backdrop-filter:blur(14px); background:color-mix(in srgb, var(--bg) 78%, transparent); border-bottom:1px solid var(--border);}
+.nav{display:flex; align-items:center; justify-content:space-between; padding:16px 28px; max-width:1180px; margin:0 auto;}
+.brand{display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:600; font-size:1.15rem;}
+.brand-mark{width:30px; height:30px; border-radius:50%; background:conic-gradient(from 220deg, var(--negative), var(--neutral) 45%, var(--positive) 100%); box-shadow:inset 0 0 0 3px var(--bg);}
+.nav-links{display:flex; gap:28px; font-size:.92rem; color:var(--muted);}
+.nav-links a{text-decoration:none; transition:color .2s;}
+.nav-links a:hover{color:var(--ink);}
+.nav-right{display:flex; align-items:center; gap:12px;}
+.theme-toggle{border:1px solid var(--border); background:var(--surface); color:var(--ink); border-radius:100px; padding:7px 10px; font-size:.85rem; display:flex; align-items:center; gap:6px;}
+.btn{border-radius:100px; border:1px solid transparent; padding:11px 20px; font-weight:600; font-size:.9rem; transition:transform .15s ease, box-shadow .15s ease, opacity .15s;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--ink); color:var(--bg);}
+.btn-primary:hover{box-shadow:0 8px 24px -8px rgba(0,0,0,.5);}
+.btn-ghost{background:transparent; color:var(--ink); border-color:var(--border);}
+.btn-ghost:hover{background:var(--surface);}
+@media (max-width:860px){ .nav-links{display:none;} }
+
+/* Hero */
+.hero{padding:76px 28px 60px; max-width:1180px; margin:0 auto; display:grid; grid-template-columns:1.1fr .9fr; gap:56px; align-items:center;}
+@media (max-width:900px){ .hero{grid-template-columns:1fr; padding-top:48px;} }
+.hero h1{font-size:clamp(2.4rem, 4.4vw, 3.6rem); font-weight:600; line-height:1.06;}
+.hero .accent{font-style:italic; color:var(--positive); font-weight:500;}
+.hero p{color:var(--muted); font-size:1.08rem; max-width:46ch; margin:20px 0 30px;}
+.hero-actions{display:flex; gap:12px; flex-wrap:wrap;}
+.flow-strip{display:flex; align-items:center; gap:10px; margin-top:34px; font-family:var(--font-mono); font-size:.78rem; color:var(--muted-2); flex-wrap:wrap;}
+.flow-strip span.node{color:var(--ink); background:var(--surface); border:1px solid var(--border); padding:5px 11px; border-radius:100px;}
+
+/* Mood ring signature element */
+.dial-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:30px 26px 24px; box-shadow:var(--shadow); position:relative;}
+.dial-caption{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;}
+.dial-caption .label{font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; color:var(--muted-2); text-transform:uppercase;}
+.dial-example{font-family:var(--font-mono); font-size:.8rem; color:var(--muted); min-height:20px;}
+.gauge-wrap{display:flex; flex-direction:column; align-items:center; padding-top:6px;}
+.needle{transform-origin:100px 110px; transition:transform 1s cubic-bezier(.2,.9,.2,1);}
+.gauge-readout{text-align:center; margin-top:-6px;}
+.gauge-score{font-family:var(--font-display); font-size:2.6rem; font-weight:600; transition:color .6s ease;}
+.gauge-tag{font-family:var(--font-mono); font-size:.82rem; color:var(--muted); letter-spacing:.04em;}
+.dial-emojis{display:flex; gap:6px; justify-content:center; margin-top:14px; font-size:1.2rem;}
+
+/* Analyzer */
+.analyzer-section{padding:30px 28px 90px; max-width:1180px; margin:0 auto;}
+.section-head{margin-bottom:26px;}
+.section-head h2{font-size:2rem; font-weight:600;}
+.tabs{display:flex; gap:6px; background:var(--surface-2); padding:6px; border-radius:100px; width:fit-content; margin-bottom:26px; border:1px solid var(--border);}
+.tab-btn{border:none; background:transparent; color:var(--muted); padding:10px 18px; border-radius:100px; font-weight:600; font-size:.88rem; transition:all .2s;}
+.tab-btn.active{background:var(--ink); color:var(--bg);}
+.analyzer-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px; box-shadow:var(--shadow);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+textarea.main-input{width:100%; min-height:150px; resize:vertical; background:var(--bg-2); color:var(--ink); border:1px solid var(--border); border-radius:var(--radius-md); padding:16px; font-size:1rem; line-height:1.55; outline:none; transition:border-color .2s;}
+textarea.main-input:focus{border-color:var(--positive);}
+.input-meta{display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-family:var(--font-mono); font-size:.76rem; color:var(--muted-2);}
+.example-btns{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;}
+.chip-btn{background:var(--surface-2); border:1px solid var(--border); color:var(--muted); border-radius:100px; padding:7px 13px; font-size:.8rem; transition:all .15s;}
+.chip-btn:hover{color:var(--ink); border-color:var(--positive);}
+.emoji-row{display:flex; gap:8px; flex-wrap:wrap; margin:18px 0;}
+.emoji-btn{width:38px; height:38px; border-radius:10px; background:var(--surface-2); border:1px solid var(--border); font-size:1.15rem; display:flex; align-items:center; justify-content:center; transition:transform .12s;}
+.emoji-btn:hover{transform:translateY(-2px); border-color:var(--positive);}
+.actions-row{display:flex; gap:12px; justify-content:flex-end; margin-top:18px; flex-wrap:wrap;}
+
+/* OCR dropzone */
+.dropzone{border:2px dashed var(--border); border-radius:var(--radius-md); padding:44px 20px; text-align:center; transition:all .2s; background:var(--bg-2);}
+.dropzone.dragover{border-color:var(--positive); background:var(--positive-soft);}
+.dropzone h3{font-family:var(--font-body); font-weight:600; font-size:1.05rem; margin-bottom:6px;}
+.dropzone p{color:var(--muted); font-size:.88rem; margin:0 0 16px;}
+.supported{font-family:var(--font-mono); font-size:.72rem; color:var(--muted-2); margin-top:14px;}
+.ocr-progress{margin-top:18px; display:none;}
+.ocr-progress.active{display:block;}
+.progress-track{height:6px; border-radius:100px; background:var(--surface-2); overflow:hidden;}
+.progress-fill{height:100%; width:0%; background:linear-gradient(90deg, var(--negative), var(--positive)); transition:width .3s ease;}
+.progress-label{font-family:var(--font-mono); font-size:.76rem; color:var(--muted); margin-top:8px;}
+.ocr-result{display:none; grid-template-columns:1fr 1fr; gap:24px; margin-top:24px;}
+.ocr-result.active{display:grid;}
+@media (max-width:760px){ .ocr-result.active{grid-template-columns:1fr;} }
+.ocr-preview img{width:100%; border-radius:var(--radius-md); border:1px solid var(--border); display:block;}
+.ocr-text-panel textarea{width:100%; min-height:160px; background:var(--bg-2); color:var(--ink); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; font-size:.95rem;}
+.panel-label{font-family:var(--font-mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted-2); margin-bottom:8px; display:block;}
+.notice{border-radius:var(--radius-sm); padding:14px 16px; font-size:.88rem; margin-top:16px; display:none; border:1px solid;}
+.notice.active{display:block;}
+.notice.error{background:var(--negative-soft); border-color:var(--negative); color:var(--ink);}
+.notice.warn{background:var(--neutral-soft); border-color:var(--neutral); color:var(--ink);}
+.combined-extra{margin-top:20px;}
+
+/* Results */
+.results{padding:10px 28px 100px; max-width:1180px; margin:0 auto; display:none;}
+.results.active{display:block;}
+.results-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:18px; margin-bottom:22px;}
+@media (max-width:920px){ .results-grid{grid-template-columns:repeat(2, 1fr);} }
+@media (max-width:560px){ .results-grid{grid-template-columns:1fr;} }
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:22px; box-shadow:var(--shadow);}
+.card .k{font-family:var(--font-mono); font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:var(--muted-2); margin-bottom:10px;}
+.card .v{font-family:var(--font-display); font-size:1.9rem; font-weight:600;}
+.card .v.small{font-size:1.35rem;}
+.card .sub{color:var(--muted); font-size:.85rem; margin-top:6px;}
+.card.sentiment{grid-column:span 1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;}
+.sentiment-glyph{font-size:2.1rem; margin-bottom:2px;}
+.two-col{display:grid; grid-template-columns:1.3fr .9fr; gap:22px; margin-bottom:22px;}
+@media (max-width:900px){ .two-col{grid-template-columns:1fr;} }
+.bar-row{display:grid; grid-template-columns:110px 1fr 44px; align-items:center; gap:12px; margin-bottom:12px; font-size:.86rem;}
+.bar-track{height:10px; border-radius:100px; background:var(--surface-2); overflow:hidden;}
+.bar-fill{height:100%; border-radius:100px; width:0%; transition:width .8s cubic-bezier(.2,.9,.2,1);}
+.emoji-cards{display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:14px;}
+.emoji-card{background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; text-align:center;}
+.emoji-card .glyph{font-size:1.7rem;}
+.emoji-card .meaning{font-weight:600; font-size:.9rem; margin-top:6px;}
+.emoji-card .meta{font-family:var(--font-mono); font-size:.72rem; color:var(--muted-2); margin-top:4px;}
+.insights-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+@media (max-width:640px){ .insights-grid{grid-template-columns:repeat(2,1fr);} }
+.insight-cell{background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; text-align:center;}
+.insight-cell .num{font-family:var(--font-mono); font-size:1.3rem; font-weight:600;}
+.insight-cell .lab{font-size:.76rem; color:var(--muted); margin-top:2px;}
+.summary-card p{font-size:1rem; color:var(--ink); line-height:1.65;}
+.sarcasm-flag{display:inline-flex; align-items:center; gap:6px; background:var(--neutral-soft); border:1px solid var(--neutral); color:var(--ink); padding:6px 12px; border-radius:100px; font-size:.8rem; font-family:var(--font-mono); margin-bottom:14px;}
+.empty-state{text-align:center; padding:60px 20px; color:var(--muted);}
+
+/* How it works */
+.how{padding:20px 28px 100px; max-width:1180px; margin:0 auto;}
+.pipeline{display:flex; flex-wrap:wrap; gap:10px; margin-top:24px;}
+.pipe-step{background:var(--surface); border:1px solid var(--border); border-radius:100px; padding:10px 16px; font-size:.85rem; display:flex; align-items:center; gap:8px;}
+.pipe-arrow{color:var(--muted-2); align-self:center;}
+
+footer{border-top:1px solid var(--border); padding:36px 28px; text-align:center; color:var(--muted-2); font-size:.82rem;}
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
+:focus-visible{outline:2px solid var(--positive); outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="brand"><span class="brand-mark"></span>Moodline</div>
+    <nav class="nav-links">
+      <a href="#top">Home</a>
+      <a href="#analyzer">Analyzer</a>
+      <a href="#analyzer">OCR</a>
+      <a href="#how">How it works</a>
+    </nav>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark or light theme">🌓 <span id="themeLabel">Dark</span></button>
+      <a href="#analyzer" class="btn btn-primary">Start Analysis</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Text · Emoji · OCR</p>
+      <h1>Understand the <span class="accent">emotion</span><br>behind every word.</h1>
+      <p>Moodline reads text, emoji, and text buried inside images to surface sentiment, emotional tone, and the hidden signals — sarcasm, amplification, contradiction — that a simple positive/negative score misses.</p>
+      <div class="hero-actions">
+        <a href="#analyzer" class="btn btn-primary" data-tab-target="text">Analyze Text</a>
+        <a href="#analyzer" class="btn btn-ghost" data-tab-target="ocr">Upload Image</a>
+      </div>
+      <div class="flow-strip">
+        <span class="node">Text</span><span>→</span><span class="node">Emoji</span><span>→</span><span class="node">Emotion</span><span>→</span><span class="node">Insight</span>
+      </div>
+    </div>
+    <div class="dial-card">
+      <div class="dial-caption">
+        <span class="label">Mood dial · live demo</span>
+      </div>
+      <div class="dial-example" id="dialExample">"Loved this tutorial! 🔥❤️"</div>
+      <div class="gauge-wrap">
+        <svg width="200" height="120" viewBox="0 0 200 120">
+          <defs>
+            <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="var(--negative)"/>
+              <stop offset="50%" stop-color="var(--neutral)"/>
+              <stop offset="100%" stop-color="var(--positive)"/>
+            </linearGradient>
+          </defs>
+          <path d="M 10 110 A 90 90 0 0 1 190 110" fill="none" stroke="url(#gaugeGrad)" stroke-width="14" stroke-linecap="round"/>
+          <g id="needleGroup" class="needle">
+            <line x1="100" y1="110" x2="100" y2="34" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="100" cy="110" r="6" fill="var(--ink)"/>
+          </g>
+        </svg>
+        <div class="gauge-readout">
+          <div class="gauge-score" id="dialScore" style="color:var(--positive)">+78</div>
+          <div class="gauge-tag" id="dialTag">POSITIVE · EXCITED</div>
+        </div>
+      </div>
+      <div class="dial-emojis" id="dialEmojis">🔥 ❤️</div>
+    </div>
+  </section>
+
+  <section class="analyzer-section" id="analyzer">
+    <div class="section-head">
+      <p class="eyebrow">Analyzer</p>
+      <h2>Run an analysis</h2>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab-btn active" data-tab="text" role="tab" aria-selected="true">Text Analysis</button>
+      <button class="tab-btn" data-tab="ocr" role="tab" aria-selected="false">Image OCR</button>
+      <button class="tab-btn" data-tab="combined" role="tab" aria-selected="false">Combined Analysis</button>
+    </div>
+
+    <div class="analyzer-card">
+
+      <!-- TEXT TAB -->
+      <div class="tab-panel active" data-panel="text">
+        <label class="panel-label" for="textInput">Enter or paste your text here</label>
+        <textarea id="textInput" class="main-input" placeholder="Loved this tutorial! 🔥❤️&#10;But the audio quality was terrible 😢" maxlength="2000"></textarea>
+        <div class="input-meta">
+          <span><span id="textCharCount">0</span>/2000 characters · <span id="textWordCount">0</span> words</span>
+        </div>
+        <div class="emoji-row" id="emojiRowText" aria-label="Quick insert emoji"></div>
+        <div class="example-btns">
+          <button class="chip-btn" data-example="I absolutely love this! 🔥❤️😍">Excited example</button>
+          <button class="chip-btn" data-example="This is terrible 😡💔">Negative example</button>
+          <button class="chip-btn" data-example="The update is okay.">Neutral example</button>
+          <button class="chip-btn" data-example="What a brilliant system 🙃💀">Sarcasm example</button>
+        </div>
+        <div class="actions-row">
+          <button class="btn btn-ghost" id="clearText">Clear</button>
+          <button class="btn btn-primary" id="analyzeTextBtn">Analyze Sentiment</button>
+        </div>
+      </div>
+
+      <!-- OCR TAB -->
+      <div class="tab-panel" data-panel="ocr">
+        <div class="dropzone" id="dropzoneOcr">
+          <h3 id="dzTitle">Drop an image here</h3>
+          <p>or</p>
+          <button class="btn btn-ghost" id="browseBtnOcr">Browse Image</button>
+          <input type="file" id="fileInputOcr" accept=".jpg,.jpeg,.png,.webp" class="sr-only" />
+          <div class="supported">Supported: JPG · JPEG · PNG · WEBP — max 10MB</div>
+        </div>
+        <div class="ocr-progress" id="ocrProgress">
+          <div class="progress-track"><div class="progress-fill" id="ocrProgressFill"></div></div>
+          <div class="progress-label" id="ocrProgressLabel">Uploading...</div>
+        </div>
+        <div class="notice error" id="ocrError"></div>
+        <div class="ocr-result" id="ocrResult">
+          <div class="ocr-preview">
+            <span class="panel-label">Image preview</span>
+            <img id="ocrImagePreview" alt="Uploaded image preview" />
+          </div>
+          <div class="ocr-text-panel">
+            <span class="panel-label">Extracted text (editable)</span>
+            <textarea id="ocrExtractedText" maxlength="2000"></textarea>
+            <div class="actions-row">
+              <button class="btn btn-ghost" id="copyOcrText">Copy Text</button>
+              <button class="btn btn-ghost" id="clearOcrText">Clear</button>
+              <button class="btn btn-primary" id="analyzeOcrBtn">Analyze Extracted Text</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMBINED TAB -->
+      <div class="tab-panel" data-panel="combined">
+        <div class="dropzone" id="dropzoneCombined">
+          <h3>Drop an image here</h3>
+          <p>or</p>
+          <button class="btn btn-ghost" id="browseBtnCombined">Browse Image</button>
+          <input type="file" id="fileInputCombined" accept=".jpg,.jpeg,.png,.webp" class="sr-only" />
+          <div class="supported">Supported: JPG · JPEG · PNG · WEBP — max 10MB</div>
+        </div>
+        <div class="ocr-progress" id="combinedProgress">
+          <div class="progress-track"><div class="progress-fill" id="combinedProgressFill"></div></div>
+          <div class="progress-label" id="combinedProgressLabel">Uploading...</div>
+        </div>
+        <div class="notice error" id="combinedError"></div>
+        <div class="ocr-result" id="combinedResult">
+          <div class="ocr-preview">
+            <span class="panel-label">Image preview</span>
+            <img id="combinedImagePreview" alt="Uploaded image preview" />
+          </div>
+          <div class="ocr-text-panel">
+            <span class="panel-label">OCR text (editable)</span>
+            <textarea id="combinedOcrText" maxlength="2000"></textarea>
+          </div>
+        </div>
+        <div class="combined-extra">
+          <label class="panel-label" for="combinedExtraText">Add extra text (optional)</label>
+          <textarea id="combinedExtraText" class="main-input" style="min-height:80px" placeholder="Any additional caption, comment, or context..."></textarea>
+        </div>
+        <div class="actions-row">
+          <button class="btn btn-ghost" id="clearCombined">Clear</button>
+          <button class="btn btn-primary" id="analyzeCombinedBtn">Analyze Combined</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="results" id="results">
+    <div class="section-head">
+      <p class="eyebrow">Results</p>
+      <h2>Analysis dashboard</h2>
+    </div>
+    <div id="sarcasmFlagWrap"></div>
+
+    <div class="results-grid">
+      <div class="card sentiment">
+        <div class="k">Overall sentiment</div>
+        <div class="sentiment-glyph" id="resGlyph">😊</div>
+        <div class="v" id="resSentiment">Positive</div>
+        <div class="sub" id="resScore">+82</div>
+      </div>
+      <div class="card">
+        <div class="k">Confidence</div>
+        <div class="v" id="resConfidence">91%</div>
+        <div class="sub">Based on signal strength</div>
+      </div>
+      <div class="card">
+        <div class="k">Primary emotion</div>
+        <div class="v small" id="resPrimaryEmotion">🔥 Excitement</div>
+      </div>
+      <div class="card">
+        <div class="k">Tone</div>
+        <div class="v small" id="resTone">Positive / Excited</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="k">Emotion breakdown</div>
+        <div id="emotionBars" style="margin-top:14px;"></div>
+      </div>
+      <div class="card">
+        <div class="k">Text insights</div>
+        <div class="insights-grid" id="insightsGrid" style="margin-top:14px;"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:22px;">
+      <div class="k">Detected emojis</div>
+      <div class="emoji-cards" id="emojiCards" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="card summary-card">
+      <div class="k">Summary</div>
+      <p id="resSummary" style="margin-top:12px;"></p>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <div class="section-head">
+      <p class="eyebrow">How it works</p>
+      <h2>From input to insight</h2>
+    </div>
+    <p style="color:var(--muted); max-width:60ch;">Moodline runs a lexicon-based sentiment engine (VADER-style scoring) alongside a dedicated emoji analyzer, then merges both signals — checking for contradictions along the way — before producing a plain-language summary.</p>
+    <div class="pipeline">
+      <span class="pipe-step">Text / Image input</span><span class="pipe-arrow">→</span>
+      <span class="pipe-step">OCR extraction</span><span class="pipe-arrow">→</span>
+      <span class="pipe-step">Emoji detection</span><span class="pipe-arrow">→</span>
+      <span class="pipe-step">Text sentiment</span><span class="pipe-arrow">→</span>
+      <span class="pipe-step">Emoji sentiment</span><span class="pipe-arrow">→</span>
+      <span class="pipe-step">Emotion classification</span><span class="pipe-arrow">→</span>
+      <span class="pipe-step">Reversal / sarcasm check</span><span class="pipe-arrow">→</span>
+      <span class="pipe-step">Score + confidence</span><span class="pipe-arrow">→</span>
+      <span class="pipe-step">Summary</span>
+    </div>
+  </section>
+</main>
+
+<footer>Moodline — a heuristic sentiment demo. Not a substitute for professional linguistic or clinical judgment.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.5/tesseract.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------------- Theme toggle ---------------- */
+const root = document.documentElement;
+const themeToggle = document.getElementById('themeToggle');
+const themeLabel = document.getElementById('themeLabel');
+themeToggle.addEventListener('click', () => {
+  const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+  themeLabel.textContent = next === 'dark' ? 'Dark' : 'Light';
+});
+
+/* ---------------- Tabs ---------------- */
+const tabBtns = document.querySelectorAll('.tab-btn');
+const panels = document.querySelectorAll('.tab-panel');
+function activateTab(name){
+  tabBtns.forEach(b => { const on = b.dataset.tab === name; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
+  panels.forEach(p => p.classList.toggle('active', p.dataset.panel === name));
+}
+tabBtns.forEach(b => b.addEventListener('click', () => activateTab(b.dataset.tab)));
+document.querySelectorAll('[data-tab-target]').forEach(el => {
+  el.addEventListener('click', () => activateTab(el.dataset.tabTarget));
+});
+
+/* ---------------- Lexicons ---------------- */
+const EMOJI_LEXICON = {
+  '🔥':{meaning:'Excitement', emotion:'excited', polarity:'positive', intensity:4},
+  '❤️':{meaning:'Affection', emotion:'love', polarity:'positive', intensity:4},
+  '😍':{meaning:'Adoration', emotion:'love', polarity:'positive', intensity:4},
+  '🙌':{meaning:'Celebration', emotion:'celebration', polarity:'positive', intensity:3},
+  '🎉':{meaning:'Celebration', emotion:'celebration', polarity:'positive', intensity:4},
+  '😊':{meaning:'Happiness', emotion:'happy', polarity:'positive', intensity:2},
+  '👍':{meaning:'Approval', emotion:'appreciation', polarity:'positive', intensity:2},
+  '😂':{meaning:'Amusement', emotion:'joy', polarity:'positive', intensity:3},
+  '🤣':{meaning:'Hilarity', emotion:'joy', polarity:'positive', intensity:4},
+  '💯':{meaning:'Affirmation', emotion:'appreciation', polarity:'positive', intensity:3},
+  '✨':{meaning:'Delight', emotion:'joy', polarity:'positive', intensity:2},
+  '🥳':{meaning:'Celebration', emotion:'celebration', polarity:'positive', intensity:4},
+  '😁':{meaning:'Joy', emotion:'happy', polarity:'positive', intensity:2},
+  '😢':{meaning:'Sadness', emotion:'sad', polarity:'negative', intensity:3},
+  '😭':{meaning:'Grief', emotion:'sad', polarity:'negative', intensity:4},
+  '💔':{meaning:'Heartbreak', emotion:'sad', polarity:'negative', intensity:4},
+  '😡':{meaning:'Anger', emotion:'angry', polarity:'negative', intensity:4},
+  '😤':{meaning:'Frustration', emotion:'frustrated', polarity:'negative', intensity:3},
+  '😠':{meaning:'Anger', emotion:'angry', polarity:'negative', intensity:3},
+  '👎':{meaning:'Disapproval', emotion:'disappointed', polarity:'negative', intensity:2},
+  '😞':{meaning:'Disappointment', emotion:'disappointed', polarity:'negative', intensity:3},
+  '😔':{meaning:'Sadness', emotion:'sad', polarity:'negative', intensity:2},
+  '😱':{meaning:'Shock/Fear', emotion:'fearful', polarity:'negative', intensity:3},
+  '😨':{meaning:'Fear', emotion:'fearful', polarity:'negative', intensity:3},
+  '😰':{meaning:'Anxiety', emotion:'fearful', polarity:'negative', intensity:3},
+  '🥺':{meaning:'Pleading', emotion:'sad', polarity:'negative', intensity:2},
+  '😩':{meaning:'Exhaustion', emotion:'frustrated', polarity:'negative', intensity:3},
+  '😅':{meaning:'Nervous relief', emotion:'curious', polarity:'neutral', intensity:1},
+  '😕':{meaning:'Confusion', emotion:'doubtful', polarity:'neutral', intensity:2},
+  '😐':{meaning:'Indifference', emotion:'neutral', polarity:'neutral', intensity:1},
+  '🤔':{meaning:'Curiosity / doubt', emotion:'doubtful', polarity:'neutral', intensity:2},
+  '💀':{meaning:'Deadpan / disbelief', emotion:'doubtful', polarity:'negative', intensity:3, sarcasm:true},
+  '🙃':{meaning:'Irony', emotion:'doubtful', polarity:'neutral', intensity:2, sarcasm:true},
+  '🙄':{meaning:'Annoyance / sarcasm', emotion:'frustrated', polarity:'negative', intensity:2, sarcasm:true}
+};
+const QUICK_EMOJIS = ['🔥','😍','🙌','❤️','🎉','😊','😢','💔','😭','😡','😤','💀','🤔','😂','👍','👎'];
+
+// word -> [valence(-4..4), emotionCategory]
+const WORD_LEXICON = {
+  love:[3,'love'], loved:[3,'love'], adore:[3.5,'love'], adored:[3.5,'love'], cherish:[3,'love'],
+  happy:[2.5,'happy'], glad:[2,'happy'], pleased:[2,'happy'], cheerful:[2.5,'happy'], content:[1.5,'happy'],
+  excited:[3,'excited'], thrilled:[3.5,'excited'], stoked:[3,'excited'], pumped:[3,'excited'], ecstatic:[3.8,'excited'],
+  amazing:[3,'excited'], awesome:[3,'excited'], incredible:[3,'excited'], fantastic:[3,'excited'], brilliant:[2.8,'excited'],
+  wonderful:[2.8,'joy'], delightful:[2.6,'joy'], joyful:[2.8,'joy'], joy:[2.6,'joy'], bliss:[3,'joy'],
+  celebrate:[2.5,'celebration'], celebration:[2.5,'celebration'], congratulations:[2.5,'celebration'], congrats:[2,'celebration'], win:[2,'celebration'], victory:[2.5,'celebration'],
+  thanks:[1.8,'appreciation'], thankful:[2,'appreciation'], grateful:[2.2,'appreciation'], appreciate:[2,'appreciation'], appreciated:[2,'appreciation'],
+  good:[1.9,'happy'], great:[2.5,'happy'], nice:[1.6,'happy'], best:[3,'excited'], perfect:[3,'excited'], superb:[2.9,'excited'], stunning:[2.8,'excited'], love:[3,'love'],
+  sad:[-2.2,'sad'], unhappy:[-2,'sad'], down:[-1.4,'sad'], blue:[-1.2,'sad'], heartbroken:[-3.4,'sad'], miserable:[-2.8,'sad'], crying:[-2,'sad'],
+  disappointed:[-2.4,'disappointed'], disappointing:[-2.2,'disappointed'], letdown:[-2,'disappointed'], underwhelmed:[-1.8,'disappointed'], mediocre:[-1.2,'disappointed'],
+  angry:[-3,'angry'], furious:[-3.6,'angry'], mad:[-2.4,'angry'], outraged:[-3.2,'angry'], rage:[-3.2,'angry'], hate:[-3,'angry'], hated:[-3,'angry'],
+  frustrated:[-2.4,'frustrated'], frustrating:[-2.4,'frustrated'], annoyed:[-1.8,'frustrated'], annoying:[-2,'frustrated'], irritated:[-2,'frustrated'],
+  afraid:[-2.2,'fearful'], scared:[-2.2,'fearful'], terrified:[-3.4,'fearful'], anxious:[-2,'fearful'], worried:[-1.8,'fearful'], fear:[-2.2,'fearful'],
+  terrible:[-3,'disappointed'], horrible:[-3.2,'disappointed'], awful:[-3,'disappointed'], worst:[-3.4,'disappointed'], bad:[-2,'disappointed'], poor:[-1.8,'disappointed'],
+  disgusting:[-3.2,'angry'], useless:[-2.4,'frustrated'], broken:[-2,'frustrated'], boring:[-1.6,'disappointed'],
+  okay:[0.2,'neutral'], ok:[0.2,'neutral'], fine:[0.4,'neutral'], average:[0,'neutral'], normal:[0,'neutral'], alright:[0.3,'neutral'],
+  curious:[0.5,'curious'], wondering:[0.3,'curious'], interested:[0.8,'curious'],
+  doubtful:[-0.6,'doubtful'], unsure:[-0.4,'doubtful'], uncertain:[-0.4,'doubtful'], skeptical:[-0.6,'doubtful']
+};
+const NEGATIONS = new Set(["not","no","never","n't","cant","can't","cannot","dont","don't","didnt","didn't","wont","won't","isnt","isn't","wasnt","wasn't","without","hardly","barely"]);
+const INTENSIFIERS = { "very":1.3,"really":1.25,"extremely":1.5,"absolutely":1.4,"so":1.2,"totally":1.3,"incredibly":1.4,"super":1.25 };
+const DIMINISHERS = { "slightly":0.6,"somewhat":0.7,"kinda":0.7,"kind of":0.7,"a bit":0.75,"barely":0.5 };
+const EMOTION_LABELS = { happy:'Happy',excited:'Excited',love:'Love',joy:'Joy',celebration:'Celebration',appreciation:'Appreciation',
+  sad:'Sad',disappointed:'Disappointed',angry:'Angry',frustrated:'Frustrated',fearful:'Fearful',
+  neutral:'Neutral',curious:'Curious',doubtful:'Doubtful' };
+const EMOTION_ICON = { happy:'😊',excited:'🔥',love:'❤️',joy:'😁',celebration:'🎉',appreciation:'🙏',
+  sad:'😢',disappointed:'😞',angry:'😡',frustrated:'😤',fearful:'😨',neutral:'😐',curious:'🤔',doubtful:'😕' };
+
+/* ---------------- Core engine ---------------- */
+const EMOJI_REGEX = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]\uFE0F?/gu;
+
+function extractEmojis(text){
+  const matches = text.match(EMOJI_REGEX) || [];
+  const counts = {};
+  matches.forEach(e => { counts[e] = (counts[e]||0) + 1; });
+  return counts;
+}
+
+function tokenize(text){
+  const stripped = text.replace(EMOJI_REGEX,' ');
+  return (stripped.toLowerCase().match(/[a-z']+/g) || []);
+}
+
+function scoreWords(tokens){
+  let rawSum = 0, posCount = 0, negCount = 0;
+  const categoryTotals = {};
+  for(let i=0;i<tokens.length;i++){
+    const t = tokens[i];
+    if(WORD_LEXICON[t]){
+      let [val, cat] = WORD_LEXICON[t];
+      // look back up to 3 tokens for negation
+      let negated = false;
+      for(let j=Math.max(0,i-3); j<i; j++){ if(NEGATIONS.has(tokens[j])) negated = true; }
+      // look at previous token for intensifier/diminisher
+      const prev = tokens[i-1];
+      if(prev && INTENSIFIERS[prev]) val *= INTENSIFIERS[prev];
+      if(prev && DIMINISHERS[prev]) val *= DIMINISHERS[prev];
+      if(negated) val = val * -0.74;
+      rawSum += val;
+      if(val > 0.15) posCount++;
+      else if(val < -0.15) negCount++;
+      categoryTotals[cat] = (categoryTotals[cat]||0) + Math.abs(val);
+    }
+  }
+  return { rawSum, posCount, negCount, categoryTotals };
+}
+
+function scoreEmojis(emojiCounts){
+  let rawSum = 0;
+  let totalCount = 0;
+  let sarcasmSignal = false;
+  const categoryTotals = {};
+  const detected = [];
+  Object.entries(emojiCounts).forEach(([emoji,count]) => {
+    const info = EMOJI_LEXICON[emoji] || {meaning:'Emoji', emotion:'neutral', polarity:'neutral', intensity:1};
+    const sign = info.polarity === 'positive' ? 1 : info.polarity === 'negative' ? -1 : 0;
+    const amplified = info.intensity * sign * (1 + 0.2*(count-1));
+    rawSum += amplified;
+    totalCount += count;
+    if(info.sarcasm) sarcasmSignal = true;
+    categoryTotals[info.emotion] = (categoryTotals[info.emotion]||0) + info.intensity*count;
+    detected.push({ emoji, count, meaning:info.meaning, emotion:info.emotion, polarity:info.polarity, intensity:info.intensity });
+  });
+  return { rawSum, totalCount, sarcasmSignal, categoryTotals, detected };
+}
+
+function compound(rawSum){
+  const c = rawSum / Math.sqrt(rawSum*rawSum + 15);
+  return Math.max(-1, Math.min(1, c));
+}
+
+function mergeCategoryTotals(a,b){
+  const out = Object.assign({}, a);
+  Object.entries(b).forEach(([k,v]) => { out[k] = (out[k]||0) + v; });
+  return out;
+}
+
+function analyze(rawText){
+  const text = (rawText || '').trim();
+  const emojiCounts = extractEmojis(text);
+  const tokens = tokenize(text);
+  const wordResult = scoreWords(tokens);
+  const emojiResult = scoreEmojis(emojiCounts);
+
+  const wordCompound = compound(wordResult.rawSum);
+  const combinedRaw = wordResult.rawSum + emojiResult.rawSum * 1.5;
+  let combinedCompound = compound(combinedRaw);
+
+  let sentiment = combinedCompound >= 0.05 ? 'Positive' : combinedCompound <= -0.05 ? 'Negative' : 'Neutral';
+  let sarcasmPossible = false;
+  let sarcasmReason = '';
+
+  if(emojiResult.sarcasmSignal && wordCompound > 0.05 && emojiResult.detected.length){
+    sarcasmPossible = true;
+    sarcasmReason = 'Positive wording conflicts with the detected emoji signals.';
+    sentiment = 'Negative';
+    combinedCompound = -Math.max(0.2, Math.abs(combinedCompound));
+  }
+
+  const totalTokens = Math.max(tokens.length, 1);
+  const confidenceBase = 40 + Math.abs(combinedCompound) * 55 + Math.min(emojiResult.totalCount,5) * 3;
+  const confidence = Math.round(Math.min(97, sarcasmPossible ? Math.min(confidenceBase, 68) : confidenceBase));
+
+  const categoryTotals = mergeCategoryTotals(wordResult.categoryTotals, emojiResult.categoryTotals);
+  let topCategories = Object.entries(categoryTotals).filter(([k]) => k !== 'neutral').sort((a,b)=>b[1]-a[1]);
+  if(topCategories.length === 0) topCategories = [['neutral', 1]];
+  const maxVal = topCategories[0][1] || 1;
+  const emotionBreakdown = topCategories.slice(0,6).map(([cat,val]) => ({
+    category: cat, label: EMOTION_LABELS[cat] || cat, pct: Math.round(Math.min(100, (val/maxVal)*100))
+  }));
+  const primaryEmotion = topCategories[0][0];
+
+  const score = Math.round(combinedCompound * 100);
+
+  const summary = buildSummary({ text, sentiment, score, primaryEmotion, emojiDetected: emojiResult.detected, sarcasmPossible, sarcasmReason, wordResult });
+
+  return {
+    text, emojiCounts, emojiDetected: emojiResult.detected, sentiment, score, confidence,
+    tone: sentiment + (primaryEmotion && primaryEmotion !== 'neutral' ? ' / ' + capitalize(primaryEmotion) : ''),
+    primaryEmotion, emotionBreakdown, sarcasmPossible, sarcasmReason,
+    insights: {
+      positiveWords: wordResult.posCount, negativeWords: wordResult.negCount,
+      neutralWords: Math.max(0, tokens.length - wordResult.posCount - wordResult.negCount),
+      emojisDetected: emojiResult.totalCount, characters: text.length, words: tokens.length
+    },
+    summary
+  };
+}
+
+function capitalize(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
+
+function buildSummary({text, sentiment, score, primaryEmotion, emojiDetected, sarcasmPossible, sarcasmReason}){
+  if(!text){ return 'Enter some text, or upload an image, to generate an analysis.'; }
+  if(sarcasmPossible){
+    return `This message reads as outwardly positive, but the emoji signals suggest irony. ${sarcasmReason} Moodline is labeling this as Possible Sarcasm rather than a confident negative read — treat it as a hint, not a verdict.`;
+  }
+  const emotionLabel = EMOTION_LABELS[primaryEmotion] || 'neutral';
+  const tone = sentiment.toLowerCase();
+  let out = `Overall, this message reads as ${score === 0 ? 'perfectly balanced' : (tone + (Math.abs(score) > 55 ? ' and strongly ' + emotionLabel.toLowerCase() : ''))}.`;
+  if(emojiDetected.length){
+    const pos = emojiDetected.filter(e => e.polarity==='positive').map(e=>e.emoji);
+    const neg = emojiDetected.filter(e => e.polarity==='negative').map(e=>e.emoji);
+    if(pos.length) out += ` ${pos.join(' ')} increase the emotional intensity.`;
+    if(neg.length) out += ` ${neg.join(' ')} introduce a negative emotional signal${pos.length ? ', though it may not outweigh the overall tone' : ''}.`;
+  } else {
+    out += ` No emoji were detected, so the read is based on wording alone.`;
+  }
+  return out;
+}
+
+/* ---------------- Emoji quick-insert ---------------- */
+const emojiRowText = document.getElementById('emojiRowText');
+QUICK_EMOJIS.forEach(e => {
+  const b = document.createElement('button');
+  b.className = 'emoji-btn'; b.type='button'; b.textContent = e;
+  b.setAttribute('aria-label','Insert '+e);
+  b.addEventListener('click', () => {
+    const ta = document.getElementById('textInput');
+    ta.value += (ta.value && !ta.value.endsWith(' ') ? ' ' : '') + e;
+    ta.dispatchEvent(new Event('input'));
+    ta.focus();
+  });
+  emojiRowText.appendChild(b);
+});
+
+/* ---------------- Text tab wiring ---------------- */
+const textInput = document.getElementById('textInput');
+const textCharCount = document.getElementById('textCharCount');
+const textWordCount = document.getElementById('textWordCount');
+textInput.addEventListener('input', () => {
+  textCharCount.textContent = textInput.value.length;
+  textWordCount.textContent = (textInput.value.trim().match(/\S+/g) || []).length;
+});
+document.querySelectorAll('[data-example]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    textInput.value = btn.dataset.example;
+    textInput.dispatchEvent(new Event('input'));
+    activateTab('text');
+  });
+});
+document.getElementById('clearText').addEventListener('click', () => { textInput.value=''; textInput.dispatchEvent(new Event('input')); });
+document.getElementById('analyzeTextBtn').addEventListener('click', () => {
+  if(!textInput.value.trim()){ textInput.focus(); return; }
+  renderResults(analyze(textInput.value));
+});
+
+/* ---------------- OCR helpers (shared) ---------------- */
+function validateFile(file){
+  const okTypes = ['image/jpeg','image/jpg','image/png','image/webp'];
+  if(!okTypes.includes(file.type)) return 'Unsupported file type. Please upload a JPG, PNG, or WEBP image.';
+  if(file.size > 10*1024*1024) return 'That image is larger than 10MB. Try a smaller file.';
+  return null;
+}
+
+function setupDropzone({dropzoneId, fileInputId, browseBtnId, onFile}){
+  const dz = document.getElementById(dropzoneId);
+  const input = document.getElementById(fileInputId);
+  const browseBtn = document.getElementById(browseBtnId);
+  browseBtn.addEventListener('click', () => input.click());
+  dz.addEventListener('click', (e) => { if(e.target === dz) input.click(); });
+  input.addEventListener('change', () => { if(input.files[0]) onFile(input.files[0]); });
+  ['dragenter','dragover'].forEach(evt => dz.addEventListener(evt, e => { e.preventDefault(); dz.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(evt => dz.addEventListener(evt, e => { e.preventDefault(); dz.classList.remove('dragover'); }));
+  dz.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if(f) onFile(f); });
+}
+
+function runOcr({file, imgEl, progressWrapId, progressFillId, progressLabelId, errorId, resultId, textAreaEl, onDone}){
+  const errEl = document.getElementById(errorId);
+  errEl.classList.remove('active'); errEl.textContent = '';
+  const err = validateFile(file);
+  if(err){ errEl.textContent = err; errEl.classList.add('active'); return; }
+
+  const url = URL.createObjectURL(file);
+  imgEl.src = url;
+  document.getElementById(resultId).classList.remove('active');
+
+  const progressWrap = document.getElementById(progressWrapId);
+  const fill = document.getElementById(progressFillId);
+  const label = document.getElementById(progressLabelId);
+  progressWrap.classList.add('active');
+  fill.style.width = '5%';
+  label.textContent = 'Uploading...';
+
+  if(typeof Tesseract === 'undefined'){
+    errEl.textContent = 'OCR engine failed to load (network issue). Please check your connection and try again.';
+    errEl.classList.add('active');
+    progressWrap.classList.remove('active');
+    return;
+  }
+
+  Tesseract.recognize(file, 'eng', {
+    logger: m => {
+      if(m.status === 'recognizing text'){
+        label.textContent = 'Detecting text...';
+        fill.style.width = Math.max(15, Math.round(m.progress*100)) + '%';
+      } else if (m.status){
+        label.textContent = m.status.charAt(0).toUpperCase() + m.status.slice(1) + '...';
+      }
+    }
+  }).then(({data}) => {
+    fill.style.width = '100%';
+    label.textContent = 'Complete';
+    const extracted = (data.text || '').trim();
+    if(!extracted){
+      errEl.textContent = "We couldn't detect readable text in this image. Try uploading a clearer image with better lighting.";
+      errEl.classList.add('active');
+    }
+    textAreaEl.value = extracted;
+    document.getElementById(resultId).classList.add('active');
+    setTimeout(() => progressWrap.classList.remove('active'), 700);
+    if(onDone) onDone(extracted);
+  }).catch(() => {
+    errEl.textContent = 'OCR processing failed. Please try again with a different image.';
+    errEl.classList.add('active');
+    progressWrap.classList.remove('active');
+  });
+}
+
+/* OCR tab */
+setupDropzone({ dropzoneId:'dropzoneOcr', fileInputId:'fileInputOcr', browseBtnId:'browseBtnOcr', onFile: f => {
+  runOcr({ file:f, imgEl: document.getElementById('ocrImagePreview'),
+    progressWrapId:'ocrProgress', progressFillId:'ocrProgressFill', progressLabelId:'ocrProgressLabel',
+    errorId:'ocrError', resultId:'ocrResult', textAreaEl: document.getElementById('ocrExtractedText') });
+}});
+document.getElementById('copyOcrText').addEventListener('click', () => {
+  const ta = document.getElementById('ocrExtractedText');
+  ta.select(); document.execCommand && document.execCommand('copy');
+  navigator.clipboard && navigator.clipboard.writeText(ta.value).catch(()=>{});
+});
+document.getElementById('clearOcrText').addEventListener('click', () => { document.getElementById('ocrExtractedText').value=''; });
+document.getElementById('analyzeOcrBtn').addEventListener('click', () => {
+  const val = document.getElementById('ocrExtractedText').value;
+  if(!val.trim()) return;
+  renderResults(analyze(val));
+});
+
+/* Combined tab */
+setupDropzone({ dropzoneId:'dropzoneCombined', fileInputId:'fileInputCombined', browseBtnId:'browseBtnCombined', onFile: f => {
+  runOcr({ file:f, imgEl: document.getElementById('combinedImagePreview'),
+    progressWrapId:'combinedProgress', progressFillId:'combinedProgressFill', progressLabelId:'combinedProgressLabel',
+    errorId:'combinedError', resultId:'combinedResult', textAreaEl: document.getElementById('combinedOcrText') });
+}});
+document.getElementById('clearCombined').addEventListener('click', () => {
+  document.getElementById('combinedOcrText').value='';
+  document.getElementById('combinedExtraText').value='';
+});
+document.getElementById('analyzeCombinedBtn').addEventListener('click', () => {
+  const combined = [document.getElementById('combinedOcrText').value, document.getElementById('combinedExtraText').value].filter(Boolean).join(' ');
+  if(!combined.trim()) return;
+  renderResults(analyze(combined));
+});
+
+/* ---------------- Results rendering ---------------- */
+const results = document.getElementById('results');
+const SENTIMENT_GLYPH = { Positive:'😊', Negative:'😞', Neutral:'😐' };
+const SENTIMENT_COLOR_VAR = { Positive:'--positive', Negative:'--negative', Neutral:'--neutral' };
+
+function renderResults(r){
+  results.classList.add('active');
+  results.scrollIntoView({behavior:'smooth', block:'start'});
+
+  document.getElementById('sarcasmFlagWrap').innerHTML = r.sarcasmPossible
+    ? `<div class="sarcasm-flag">⚠️ Possible Sarcasm — ${r.sarcasmReason}</div>` : '';
+
+  document.getElementById('resGlyph').textContent = SENTIMENT_GLYPH[r.sentiment] || '😐';
+  document.getElementById('resSentiment').textContent = r.sentiment;
+  document.getElementById('resSentiment').style.color = `var(${SENTIMENT_COLOR_VAR[r.sentiment]})`;
+  document.getElementById('resScore').textContent = (r.score>0?'+':'') + r.score + ' ' + r.sentiment;
+  document.getElementById('resConfidence').textContent = r.confidence + '%';
+  const emoIcon = EMOTION_ICON[r.primaryEmotion] || '🙂';
+  document.getElementById('resPrimaryEmotion').textContent = emoIcon + ' ' + (EMOTION_LABELS[r.primaryEmotion] || 'Neutral');
+  document.getElementById('resTone').textContent = r.tone;
+
+  // emotion bars
+  const bars = document.getElementById('emotionBars');
+  bars.innerHTML = '';
+  r.emotionBreakdown.forEach(e => {
+    const colorVar = ['sad','disappointed','angry','frustrated','fearful'].includes(e.category) ? '--negative' :
+      ['neutral','curious','doubtful'].includes(e.category) ? '--neutral' : '--positive';
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = `<span>${e.label}</span><div class="bar-track"><div class="bar-fill" style="background:var(${colorVar})"></div></div><span style="font-family:var(--font-mono)">${e.pct}%</span>`;
+    bars.appendChild(row);
+    requestAnimationFrame(() => { row.querySelector('.bar-fill').style.width = e.pct + '%'; });
+  });
+
+  // insights
+  const ins = r.insights;
+  const insightsGrid = document.getElementById('insightsGrid');
+  insightsGrid.innerHTML = '';
+  [['Positive words',ins.positiveWords],['Negative words',ins.negativeWords],['Neutral words',ins.neutralWords],
+   ['Emojis detected',ins.emojisDetected],['Characters',ins.characters],['Words',ins.words]].forEach(([lab,num]) => {
+    const cell = document.createElement('div');
+    cell.className = 'insight-cell';
+    cell.innerHTML = `<div class="num">${num}</div><div class="lab">${lab}</div>`;
+    insightsGrid.appendChild(cell);
+  });
+
+  // emoji cards
+  const emojiCards = document.getElementById('emojiCards');
+  emojiCards.innerHTML = '';
+  if(r.emojiDetected.length === 0){
+    emojiCards.innerHTML = `<div class="empty-state" style="grid-column:1/-1; padding:20px;">No emoji detected in this input.</div>`;
+  } else {
+    r.emojiDetected.forEach(e => {
+      const card = document.createElement('div');
+      card.className = 'emoji-card';
+      const intensityLabel = ['—','Low','Moderate','High','Very High'][e.intensity] || 'Moderate';
+      card.innerHTML = `<div class="glyph">${e.emoji}</div><div class="meaning">${e.meaning}</div><div class="meta">${capitalize(e.polarity)} · ${intensityLabel} · ×${e.count}</div>`;
+      emojiCards.appendChild(card);
+    });
+  }
+
+  document.getElementById('resSummary').textContent = r.summary;
+}
+
+/* ---------------- Hero mood dial demo ---------------- */
+const DEMO_EXAMPLES = [
+  '"Loved this tutorial! 🔥❤️"',
+  '"This service is terrible 😡💔"',
+  '"The update is okay."',
+  '"What a brilliant system 🙃💀"'
+];
+let demoIdx = 0;
+function updateDial(text){
+  const r = analyze(text.replace(/^"|"$/g,''));
+  const needle = document.getElementById('needleGroup');
+  const deg = (Math.max(-100,Math.min(100,r.score))/100) * 90;
+  needle.style.transform = `rotate(${deg}deg)`;
+  const scoreEl = document.getElementById('dialScore');
+  scoreEl.textContent = (r.score>0?'+':'') + r.score;
+  const colorVar = SENTIMENT_COLOR_VAR[r.sentiment];
+  scoreEl.style.color = `var(${colorVar})`;
+  document.getElementById('dialTag').textContent = (r.sarcasmPossible ? 'POSSIBLE SARCASM' : r.sentiment.toUpperCase()) + (r.primaryEmotion && r.primaryEmotion!=='neutral' ? ' · ' + EMOTION_LABELS[r.primaryEmotion].toUpperCase() : '');
+  document.getElementById('dialExample').textContent = text;
+  document.getElementById('dialEmojis').textContent = r.emojiDetected.map(e=>e.emoji).join(' ') || '—';
+}
+updateDial(DEMO_EXAMPLES[0]);
+setInterval(() => {
+  demoIdx = (demoIdx + 1) % DEMO_EXAMPLES.length;
+  updateDial(DEMO_EXAMPLES[demoIdx]);
+}, 4200);
+
+})();
+</script>
+</body>
+</html>

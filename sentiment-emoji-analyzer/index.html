@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moodline — Professional Sentiment &amp; Emoji Analyzer</title>
+  <meta name="description" content="Production-grade client-side Sentiment, Text, Emoji, and Image OCR Analyzer with deterministic compound scoring, emotion breakdown, and linguistic nuance detection." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body>
+
+  <!-- Sticky Header -->
+  <header class="site-header">
+    <div class="container navbar">
+      <a href="#top" class="brand-logo" aria-label="Moodline Sentiment Analyzer">
+        <span class="brand-mark">⚡</span>
+        <span>Moodline</span>
+      </a>
+      <nav aria-label="Main Navigation">
+        <ul class="nav-menu">
+          <li><a href="#top" class="nav-link">Home</a></li>
+          <li><a href="#analyzer" class="nav-link">Analyzer</a></li>
+          <li><a href="#how" class="nav-link">How It Works</a></li>
+          <li><a href="#formulas" class="nav-link">Formulas</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <button class="theme-toggle-btn" id="themeToggle" aria-label="Toggle dark or light theme">
+          <span id="themeIcon">🌙</span>
+          <span id="themeLabel">Dark</span>
+        </button>
+        <a href="#analyzer" class="btn btn-primary btn-sm">Start Analysis</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <span class="eyebrow">Text · Emoji · Image OCR Analytics</span>
+          <h1>Understand the <span class="highlight">emotion</span> behind every message.</h1>
+          <p class="hero-description">
+            Analyze text, emoji, and text inside images to identify sentiment, emotional tone, intensity, and important linguistic signals like negation, amplification, and sarcasm.
+          </p>
+          <div class="hero-actions">
+            <a href="#analyzer" class="btn btn-primary" data-tab-target="text">Analyze Text</a>
+            <a href="#analyzer" class="btn btn-secondary" data-tab-target="ocr">Upload Image OCR</a>
+          </div>
+          <div class="hero-feature-pills">
+            <span class="feature-pill">Deterministic Scoring</span>
+            <span>→</span>
+            <span class="feature-pill">Emoji Polarity</span>
+            <span>→</span>
+            <span class="feature-pill">Emotion Categories</span>
+            <span>→</span>
+            <span class="feature-pill">Tesseract OCR</span>
+          </div>
+        </div>
+
+        <!-- Live Hero Mood Dial Demo -->
+        <div class="hero-dial-card" aria-live="polite">
+          <div class="hero-dial-header">
+            <span class="dial-badge">Live Heuristic Dial</span>
+            <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-muted);">Real-Time Engine</span>
+          </div>
+          <div class="hero-dial-example" id="heroDialExample">"Loved this tutorial! 🔥❤️"</div>
+          
+          <div class="gauge-svg-wrapper">
+            <svg width="200" height="110" viewBox="0 0 200 110" aria-hidden="true">
+              <defs>
+                <linearGradient id="heroGaugeGradient" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="var(--negative)" />
+                  <stop offset="50%" stop-color="var(--neutral)" />
+                  <stop offset="100%" stop-color="var(--positive)" />
+                </linearGradient>
+              </defs>
+              <path d="M 15 100 A 85 85 0 0 1 185 100" fill="none" stroke="url(#heroGaugeGradient)" stroke-width="14" stroke-linecap="round" />
+              <g id="heroDialNeedle" class="gauge-needle">
+                <line x1="100" y1="100" x2="100" y2="26" />
+                <circle cx="100" cy="100" r="6" />
+              </g>
+            </svg>
+          </div>
+
+          <div class="hero-dial-score" id="heroDialScore">+78</div>
+          <div class="hero-dial-tag" id="heroDialTag">POSITIVE · EXCITED</div>
+          <div class="hero-dial-emojis" id="heroDialEmojis">🔥 ❤️</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Analyzer Workspace Section -->
+    <section class="analyzer-section" id="analyzer">
+      <div class="container">
+        <div class="section-header">
+          <span class="eyebrow">Analytics Workspace</span>
+          <h2 class="section-title">Sentiment &amp; Linguistic Analyzer</h2>
+          <p class="section-subtitle">Choose an input method below to process raw text, extract words from images via client-side OCR, or combine both for context-aware scoring.</p>
+        </div>
+
+        <!-- Tab Selection -->
+        <div class="tabs-nav" role="tablist" aria-label="Analyzer Input Modes">
+          <button class="tab-btn active" data-tab="text" role="tab" aria-selected="true" id="tab-text" aria-controls="panel-text">Text Analysis</button>
+          <button class="tab-btn" data-tab="ocr" role="tab" aria-selected="false" id="tab-ocr" aria-controls="panel-ocr">Image OCR</button>
+          <button class="tab-btn" data-tab="combined" role="tab" aria-selected="false" id="tab-combined" aria-controls="panel-combined">Combined Analysis</button>
+        </div>
+
+        <div class="analyzer-card">
+          <!-- PANEL 1: TEXT ANALYSIS -->
+          <div class="tab-panel active" id="panel-text" data-panel="text" role="tabpanel" aria-labelledby="tab-text">
+            <label class="input-label" for="textInput">Enter or paste your text:</label>
+            <textarea id="textInput" class="main-textarea" placeholder="Loved this tutorial! 🔥❤️&#10;The explanations were crystal clear and incredibly helpful." maxlength="3000"></textarea>
+
+            <div class="input-meta-bar">
+              <span><span id="textCharCount">0</span> / 3000 characters</span>
+              <span><span id="textWordCount">0</span> words · <span id="textEmojiCount">0</span> emojis</span>
+            </div>
+
+            <!-- Quick Emoji Palette -->
+            <div class="emoji-palette-container">
+              <span class="palette-label">Quick Emoji Insert</span>
+              <div class="emoji-palette-row" id="emojiPaletteText"></div>
+            </div>
+
+            <!-- Preset Example Chips -->
+            <div class="preset-examples-row">
+              <span class="palette-label" style="margin-bottom:0;">Examples:</span>
+              <button type="button" class="chip-btn" data-example="I absolutely love this! 🔥❤️😍">Excited</button>
+              <button type="button" class="chip-btn" data-example="This is terrible 😡💔">Negative</button>
+              <button type="button" class="chip-btn" data-example="The update is okay.">Neutral</button>
+              <button type="button" class="chip-btn" data-example="What a brilliant system 🙃💀">Sarcasm</button>
+              <button type="button" class="chip-btn" data-example="I do not love this product.">Negation</button>
+              <button type="button" class="chip-btn" data-example="I am very happy with the results!">Intensified</button>
+            </div>
+
+            <div class="notice-inline error" id="textNotice"></div>
+
+            <div class="actions-row">
+              <button type="button" class="btn btn-ghost" id="clearTextBtn">Clear</button>
+              <button type="button" class="btn btn-primary" id="analyzeTextBtn">Analyze Sentiment</button>
+            </div>
+          </div>
+
+          <!-- PANEL 2: IMAGE OCR -->
+          <div class="tab-panel" id="panel-ocr" data-panel="ocr" role="tabpanel" aria-labelledby="tab-ocr">
+            <div class="dropzone" id="dropzoneOcr" tabindex="0" role="button" aria-label="Upload image for OCR">
+              <span class="dropzone-icon">📷</span>
+              <div class="dropzone-title">Drag &amp; drop an image here</div>
+              <div class="dropzone-desc">or click to browse from your device</div>
+              <button type="button" class="btn btn-secondary btn-sm" id="browseBtnOcr">Browse Image</button>
+              <input type="file" id="fileInputOcr" accept=".jpg,.jpeg,.png,.webp" class="sr-only" />
+              <div class="dropzone-meta">Supports JPG, JPEG, PNG, WEBP (Max 10MB) — Runs 100% locally in browser via Tesseract.js</div>
+            </div>
+
+            <!-- OCR Progress Bar -->
+            <div class="ocr-progress-container" id="ocrProgress">
+              <div class="progress-track">
+                <div class="progress-fill" id="ocrProgressFill"></div>
+              </div>
+              <div class="progress-label" id="ocrProgressLabel">Processing image...</div>
+            </div>
+
+            <div class="alert-banner error" id="ocrError" style="display:none; margin-top:16px;"></div>
+
+            <!-- OCR Result Layout -->
+            <div class="ocr-split-view" id="ocrResult">
+              <div class="ocr-preview-panel">
+                <span class="input-label">Image Preview</span>
+                <img id="ocrImagePreview" alt="Uploaded OCR Target" />
+                <div id="ocrDetectedEmojisBadge" class="visual-emoji-badge" style="display:none;"></div>
+              </div>
+              <div class="ocr-extracted-panel">
+                <span class="input-label">Extracted Text &amp; Emojis (Editable)</span>
+                <textarea id="ocrExtractedText" class="main-textarea" placeholder="Extracted text and emojis will appear here..."></textarea>
+                
+                <!-- Quick Emoji Palette for OCR -->
+                <div class="emoji-palette-container" style="margin: 10px 0;">
+                  <span class="palette-label">Add / Adjust Emojis</span>
+                  <div class="emoji-palette-row" id="emojiPaletteOcr"></div>
+                </div>
+
+                <div class="actions-row">
+                  <button type="button" class="btn btn-secondary btn-sm" id="convertOcrEmoticonsBtn">Convert :) to Emojis</button>
+                  <button type="button" class="btn btn-ghost btn-sm" id="copyOcrBtn">Copy Text</button>
+                  <button type="button" class="btn btn-ghost btn-sm" id="clearOcrBtn">Clear</button>
+                  <button type="button" class="btn btn-primary btn-sm" id="analyzeOcrBtn">Analyze Extracted Text</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL 3: COMBINED ANALYSIS -->
+          <div class="tab-panel" id="panel-combined" data-panel="combined" role="tabpanel" aria-labelledby="tab-combined">
+            <div class="dropzone" id="dropzoneCombined" tabindex="0" role="button" aria-label="Upload image for combined analysis">
+              <span class="dropzone-icon">🖼️</span>
+              <div class="dropzone-title">Upload an image containing text &amp; emojis</div>
+              <div class="dropzone-desc">Drag &amp; drop or click to browse</div>
+              <button type="button" class="btn btn-secondary btn-sm" id="browseBtnCombined">Browse Image</button>
+              <input type="file" id="fileInputCombined" accept=".jpg,.jpeg,.png,.webp" class="sr-only" />
+              <div class="dropzone-meta">Supports JPG, JPEG, PNG, WEBP (Max 10MB)</div>
+            </div>
+
+            <div class="ocr-progress-container" id="combinedProgress">
+              <div class="progress-track">
+                <div class="progress-fill" id="combinedProgressFill"></div>
+              </div>
+              <div class="progress-label" id="combinedProgressLabel">Processing image &amp; emojis...</div>
+            </div>
+
+            <div class="alert-banner error" id="combinedError" style="display:none; margin-top:16px;"></div>
+
+            <div class="ocr-split-view" id="combinedResult">
+              <div class="ocr-preview-panel">
+                <span class="input-label">Image Preview</span>
+                <img id="combinedImagePreview" alt="Combined Image Target" />
+                <div id="combinedDetectedEmojisBadge" class="visual-emoji-badge" style="display:none;"></div>
+              </div>
+              <div class="ocr-extracted-panel">
+                <span class="input-label">Extracted OCR Text &amp; Emojis</span>
+                <textarea id="combinedOcrText" class="main-textarea" placeholder="OCR text and emojis will appear here..."></textarea>
+                
+                <!-- Quick Emoji Palette for Combined -->
+                <div class="emoji-palette-container" style="margin: 10px 0;">
+                  <span class="palette-label">Add / Adjust Emojis</span>
+                  <div class="emoji-palette-row" id="emojiPaletteCombined"></div>
+                </div>
+
+                <div class="actions-row" style="margin-top: 8px;">
+                  <button type="button" class="btn btn-secondary btn-sm" id="convertCombinedEmoticonsBtn">Convert :) to Emojis</button>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+              <label class="input-label" for="combinedExtraText">Additional User Context / Captions (Optional):</label>
+              <textarea id="combinedExtraText" class="main-textarea" style="min-height: 90px;" placeholder="Add comments, reactions, or emojis to combine with the image text..."></textarea>
+            </div>
+
+            <div class="actions-row">
+              <button type="button" class="btn btn-ghost" id="clearCombinedBtn">Clear All</button>
+              <button type="button" class="btn btn-primary" id="analyzeCombinedBtn">Analyze Combined</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Dashboard Section -->
+    <section class="results-section" id="results" aria-live="polite">
+      <div class="container">
+        <div class="section-header">
+          <span class="eyebrow">Analysis Report</span>
+          <h2 class="section-title">Results Dashboard</h2>
+          <p class="section-subtitle">Real-time breakdown of valence, emotion categorization, linguistic markers, and emoji contributions.</p>
+        </div>
+
+        <!-- Sarcasm & Contradiction Alert Container -->
+        <div id="sarcasmFlagWrap"></div>
+
+        <!-- Top KPI Cards Grid -->
+        <div class="kpi-grid">
+          <!-- KPI 1: Overall Sentiment -->
+          <div class="kpi-card sentiment-hero-kpi">
+            <div class="kpi-header" style="width:100%;">
+              <span class="kpi-label">Overall Sentiment</span>
+            </div>
+            <div class="kpi-sentiment-icon" id="resGlyph">😊</div>
+            <div class="kpi-val" id="resSentiment">Positive</div>
+            <div class="kpi-sub" id="resScoreSub">Score range: -100 to +100</div>
+          </div>
+
+          <!-- KPI 2: Sentiment Score -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Sentiment Score</span>
+              <span class="tag-pill" style="font-size:0.7rem;">-100 to +100</span>
+            </div>
+            <div class="kpi-val" id="resScoreVal">+82</div>
+            <div class="kpi-sub">Compound normalized valence</div>
+          </div>
+
+          <!-- KPI 3: Signal Confidence -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Signal Confidence</span>
+              <span class="tooltip-wrap" title="Signal confidence reflects the strength and consistency of detected sentiment signals. It is not a statistical probability.">
+                <span class="tooltip-icon">?</span>
+              </span>
+            </div>
+            <div class="kpi-val" id="resConfidence">91%</div>
+            <div class="kpi-sub">Strength &amp; consistency metric</div>
+          </div>
+
+          <!-- KPI 4: Primary Emotion -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Primary Emotion</span>
+            </div>
+            <div class="kpi-val compact" id="resPrimaryEmotion">🔥 Excitement</div>
+            <div class="kpi-sub" id="resTone">Positive / Excited</div>
+          </div>
+        </div>
+
+        <!-- Sentiment Precision Meter Card -->
+        <div class="meter-card">
+          <div class="meter-header">
+            <span class="kpi-label">Sentiment Continuum (-100 to +100)</span>
+            <span id="meterScoreLabel" style="font-family: var(--font-mono); font-weight: 700; font-size: 0.95rem; color: var(--primary);">+82 (Positive)</span>
+          </div>
+          <div class="meter-scale-container">
+            <div class="meter-track">
+              <div id="meterFill" class="meter-fill" style="width: 91%;"></div>
+              <div id="meterNeedle" class="meter-needle-marker" style="left: 91%;"></div>
+            </div>
+            <div class="meter-labels">
+              <span>-100 Negative</span>
+              <span>-50</span>
+              <span>0 Neutral</span>
+              <span>+50</span>
+              <span>+100 Positive</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Formula Calculation Card -->
+        <div class="card-panel" style="margin-bottom: 24px;">
+          <div class="panel-title">Sentiment Formula Calculation</div>
+          <div class="formula-breakdown-card">
+            <div class="formula-title-badge">Formula: Sentiment = [ (Positive - Negative) / (Positive + Negative + Neutral) ] × 100</div>
+            <div class="formula-expression" id="resFormulaCalc">Score = [ (0 - 0) / (0 + 0 + 0) ] × 100 = 0</div>
+            <div class="formula-components-grid">
+              <div class="formula-component-item">
+                <span class="comp-label">Positive (P):</span>
+                <span class="comp-val" id="formulaPosVal" style="color:var(--positive);">0</span>
+              </div>
+              <div class="formula-component-item">
+                <span class="comp-label">Negative (N):</span>
+                <span class="comp-val" id="formulaNegVal" style="color:var(--negative);">0</span>
+              </div>
+              <div class="formula-component-item">
+                <span class="comp-label">Neutral (Neu):</span>
+                <span class="comp-val" id="formulaNeuVal" style="color:var(--neutral);">0</span>
+              </div>
+              <div class="formula-component-item">
+                <span class="comp-label">Total Signals:</span>
+                <span class="comp-val" id="formulaTotalVal">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analyzed Text with Keyword Highlights Card -->
+        <div class="card-panel" style="margin-bottom: 24px;">
+          <div class="panel-title">Analyzed Text &amp; Highlighted Keywords</div>
+          <div class="highlighted-text-box" id="highlightedTextBox"></div>
+          <div class="keyword-tags-container">
+            <div class="keyword-group">
+              <span class="keyword-group-title" style="color:var(--positive);">● Positive Keywords (Green):</span>
+              <div class="keyword-badges-row" id="posKeywordsBadges"></div>
+            </div>
+            <div class="keyword-group" style="margin-top: 10px;">
+              <span class="keyword-group-title" style="color:var(--negative);">● Negative Keywords (Red):</span>
+              <div class="keyword-badges-row" id="negKeywordsBadges"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Two-Column Analytics Layout -->
+        <div class="analytics-two-col">
+          <!-- Column 1: Emotion Breakdown -->
+          <div class="card-panel">
+            <div class="panel-title">Emotion Breakdown (% of maximum signal)</div>
+            <div id="emotionBars"></div>
+          </div>
+
+          <!-- Column 2: Text Insights Metrics -->
+          <div class="card-panel">
+            <div class="panel-title">Linguistic Signals &amp; Token Metrics</div>
+            <div class="insights-metric-grid" id="insightsGrid"></div>
+          </div>
+        </div>
+
+        <!-- Detected Emojis Grid -->
+        <div class="card-panel" style="margin-bottom: 24px;">
+          <div class="panel-title">Detected Emojis &amp; Valence Contributions</div>
+          <div class="detected-emojis-container" id="emojiCards"></div>
+        </div>
+
+        <!-- Natural Language Summary Box -->
+        <div class="summary-box">
+          <span class="eyebrow" style="margin-bottom: 6px;">Deterministic Executive Summary</span>
+          <p id="resSummary"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-section" id="how">
+      <div class="container">
+        <div class="section-header">
+          <span class="eyebrow">Architecture &amp; Formulas</span>
+          <h2 class="section-title">From Input to Insight</h2>
+          <p class="section-subtitle">Moodline applies standard Social Media Analytics polarity calculation to fuse lexical valences, emoji intensities, and linguistic modifiers into a normalized score.</p>
+        </div>
+
+        <!-- Pipeline Flow Steps -->
+        <div class="pipeline-flow">
+          <div class="pipeline-step"><span>1</span> Input Text / OCR</div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step"><span>2</span> Tokenization</div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step"><span>3</span> Word Scoring</div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step"><span>4</span> Modifier Scaling</div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step"><span>5</span> Emoji Repetition</div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step"><span>6</span> Polarity Aggregation (P, N, Neu)</div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step"><span>7</span> Final Formula × 100</div>
+        </div>
+
+        <!-- Academic Formula Cards -->
+        <div class="formula-grid" id="formulas">
+          <div class="formula-card">
+            <h3>Primary Sentiment Score Formula</h3>
+            <p>Calculates the normalized polarity ratio between positive and negative signals over total signal volume:</p>
+            <div class="formula-code" style="font-size: 0.92rem; font-weight: 600;">
+Sentiment Score = [ (Positive - Negative) / (Positive + Negative + Neutral) ] × 100
+            </div>
+            <p style="margin-top: 10px; font-size: 0.82rem; color: var(--ink-secondary);">
+              • Positive = PosWords + (PosEmojis × 1.5)<br>
+              • Negative = NegWords + (NegEmojis × 1.5)<br>
+              • Neutral = NeuWords + NeuEmojis
+            </p>
+          </div>
+
+          <div class="formula-card">
+            <h3>Word &amp; Modifier Scaling</h3>
+            <p>Each recognized lexical token is scaled by preceding intensifiers, diminishers, and negations:</p>
+            <div class="formula-code">
+Word Valence = BaseValence × Modifier<br>
+Negation Lookback (3 tokens): val = val × -0.74<br>
+Intensifier (1 token): e.g., "very" (×1.30), "extremely" (×1.50)<br>
+Diminisher (1-2 tokens): e.g., "slightly" (×0.60), "a bit" (×0.75)
+            </div>
+          </div>
+
+          <div class="formula-card">
+            <h3>Emoji Repetition &amp; Intensity</h3>
+            <p>Repeated emojis are weighted with diminishing returns, then scaled by the configurable emoji factor:</p>
+            <div class="formula-code">
+Repetition Factor = 1 + 0.2 × (count - 1)<br>
+Emoji Contribution = Intensity × Repetition × 1.5
+            </div>
+          </div>
+
+          <div class="formula-card">
+            <h3>Classification &amp; Sarcasm Heuristic</h3>
+            <p>Score thresholds determine the sentiment classification label:</p>
+            <div class="formula-code">
+Score ≥ +5  → Positive<br>
+Score ≤ -5  → Negative<br>
+-5 &lt; Score &lt; +5 → Neutral<br>
+Positive Text + Sarcasm Emoji (🙃, 💀) → "Possible Sarcasm"
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <div>
+        <strong>Moodline</strong> — Sentiment, Text, Emoji &amp; OCR Analyzer
+      </div>
+      <div class="footer-disclaimer">
+        Disclaimer: Moodline is a client-side heuristic lexicon analyzer built for educational and social media text evaluation. It is not a clinical, psychological, or medical diagnostic instrument.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Tesseract.js (Client-Side OCR) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.5/tesseract.min.js"></script>
+
+  <!-- Modular Application Scripts -->
+  <script src="js/data/config.js"></script>
+  <script src="js/data/wordLexicon.js"></script>
+  <script src="js/data/emojiLexicon.js"></script>
+  <script src="js/emoji.js"></script>
+  <script src="js/sentiment.js"></script>
+  <script src="js/ocr.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
