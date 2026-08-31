@@ -11,7 +11,7 @@ Currently, this repository features **Moodline**—a production-grade, serverles
 - [📁 Repository Structure](#-repository-structure)
 - [📊 Project Comparison](#-project-comparison)
 - [🚀 Projects](#-projects)
-  - [Moodline: Sentiment & Emoji Analyzer](#moodline-sentiment--emoji-analyzer)
+  - [Sentiment Test & Emoji Analyzer](#moodline-sentiment--emoji-analyzer)
 - [🛠️ Technologies & Tools](#️-technologies--tools)
 - [⚙️ Installation & Setup](#️-installation--setup)
 - [▶️ Running the Projects](#️-running-the-projects)
@@ -40,16 +40,35 @@ SMA Projects/
 
 The repository organizes its workflows into modular and standalone formats:
 
-| Project / Build                                                     | Purpose                                                                                           | Main Technologies                          | Data / Input                                   | Type             | Status       |
-| :------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------ | :----------------------------------------- | :--------------------------------------------- | :--------------- | :----------- |
-| [Modular Sentiment Analyzer](./sentiment-emoji-analyzer/index.html) | Production-ready dashboard with modular stylesheet architecture and segregated engine components. | HTML5, CSS3, ES6 JS, Tesseract.js          | Plain Text, Emojis, Image Files (JPG/PNG/WEBP) | Frontend Web App | 🔵 Completed |
-| [Standalone Prototype](./sentiment-emoji-analyzer/sentiment.html)   | A single-file, highly portable distribution combining all styles, configurations, and scripts.    | HTML5, Inline CSS, Inline JS, Tesseract.js | Plain Text, Emojis, Image Files (JPG/PNG/WEBP) | Frontend Web App | 🔵 Completed |
+| Project / Build                                                          | Purpose                                                                                           | Main Technologies                 | Data / Input                                   | Type             | Status       |
+| :----------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------ | :-------------------------------- | :--------------------------------------------- | :--------------- | :----------- |
+| [Sentiment Test & Emoji Analyzer](./sentiment-emoji-analyzer/index.html) | Production-ready dashboard with modular stylesheet architecture and segregated engine components. | HTML5, CSS3, ES6 JS, Tesseract.js | Plain Text, Emojis, Image Files (JPG/PNG/WEBP) | Frontend Web App | 🔵 Completed |
+
+<!-- | [Standalone Prototype](./sentiment-emoji-analyzer/sentiment.html)   | A single-file, highly portable distribution combining all styles, configurations, and scripts.    | HTML5, Inline CSS, Inline JS, Tesseract.js | Plain Text, Emojis, Image Files (JPG/PNG/WEBP) | Frontend Web App | 🔵 Completed |
+| -->
 
 ---
 
+### IMPORTANT
+
+The project name MUST be a clickable relative GitHub link.
+
+When someone clicks it, GitHub should navigate directly to that project folder.
+
+Only include verified information.
+
+Possible status values:
+
+- 🟢 Active
+- 🟡 Development
+- 🔵 Completed
+- ⚪ Experimental
+
+## Choose based on repository evidence. If status cannot be determined, use a neutral description such as `Available`.
+
 ## 🚀 Projects
 
-### Moodline: Sentiment & Emoji Analyzer
+### Sentiment Test & Emoji Analyzer
 
 Moodline is a modern, high-fidelity client-side web application that implements deterministic sentiment analysis and character recognition. By running entirely inside the web browser, it ensures maximum performance and complete data privacy, as no user content is sent to external servers.
 
@@ -129,36 +148,61 @@ cd "SMA Projects"
 
 ---
 
-## ▶️ Running the Projects
+## ▶️ How to Run
 
-Because Moodline runs entirely client-side, you do not need to install complex dependencies or packages.
+Detect the project type from its files and provide the exact, correct method — do not guess or mix formats.
 
-### Option A: Static Loading (No Server)
+### Static Web Application
 
-1. Navigate to the [`sentiment-emoji-analyzer`](./sentiment-emoji-analyzer) directory.
-2. Double-click [`index.html`](./sentiment-emoji-analyzer/index.html) to open the modular dashboard, or [`sentiment.html`](./sentiment-emoji-analyzer/sentiment.html) for the standalone prototype, directly in your browser.
-
-### Option B: Local HTTP Server (Recommended)
-
-Running through an HTTP server ensures that Web Workers for client-side libraries load smoothly.
-
-**Using Python:**
+If the project is plain HTML/CSS/JS with no build tooling:
 
 ```bash
-cd sentiment-emoji-analyzer
-python -m http.server 8000
+cd project-folder
 ```
 
-Open your browser and navigate to `http://localhost:8000` to view the application.
+### Python Project
 
-**Using Node.js:**
+Only if `requirements.txt` (or similar) and an entry-point script (e.g. `app.py`) actually exist:
 
 ```bash
-cd sentiment-emoji-analyzer
-npx serve .
+cd project-folder
+pip install -r requirements.txt
+python app.py
+```
+
+Open your browser and navigate to http://localhost:8000 to view the application.
+
+### Jupyter Notebook
+
+If the project consists of `.ipynb` files:
+
+```bash
+cd project-folder
+jupyter notebook
+```
+
+Adjust the command if the repo specifies a different launcher (e.g. `jupyter lab`).
+
+### Node.js Project
+
+Only if `package.json` exists and defines the relevant scripts:
+
+```bash
+npm install
+npm start
 ```
 
 Open your browser and navigate to the address shown (usually `http://localhost:3000`).
+
+Use whatever script name is actually defined (`start`, `dev`, `serve`, etc.) — don't assume `npm start` works if it isn't listed.
+
+---
+
+### Important
+
+- Only include a section if its corresponding files/commands genuinely exist in the project.
+- If the project has its own README, use it for additional context, but verify every claim against the actual implementation rather than trusting it blindly.
+- Never fabricate a run command that isn't backed by a real file (`requirements.txt`, `package.json`, entry-point script, etc.).
 
 ---
 
@@ -166,11 +210,11 @@ Open your browser and navigate to the address shown (usually `http://localhost:3
 
 Roadmap of planned capabilities to extend the Social Media Analytics projects:
 
-- [ ] **Interactive Visual Analytics:** Add charts (e.g. Chart.js) to show time-series sentiment trends from uploaded datasets.
-- [ ] **Batch Text Processing:** Support importing CSV or JSON exports of tweets/comments to analyze and export bulk reports.
-- [ ] **Multilingual Sentiment Support:** Introduce localized word and emoji lexicons for Spanish, French, and German.
-- [ ] **Advanced Transformer models:** Provide an optional API bridge to lightweight transformer models (e.g., Xenova/transformers.js) to run small sentiment models directly in browser WASM.
-- [ ] **API Pipelines:** Integrate standard social media public scrapers or mock APIs to ingest live streams.
+- **Interactive Visual Analytics:** Add charts (e.g. Chart.js) to show time-series sentiment trends from uploaded datasets.
+- **Batch Text Processing:** Support importing CSV or JSON exports of tweets/comments to analyze and export bulk reports.
+- **Multilingual Sentiment Support:** Introduce localized word and emoji lexicons for Spanish, French, and German.
+- **Advanced Transformer models:** Provide an optional API bridge to lightweight transformer models (e.g., Xenova/transformers.js) to run small sentiment models directly in browser WASM.
+- **API Pipelines:** Integrate standard social media public scrapers or mock APIs to ingest live streams.
 
 ---
 
