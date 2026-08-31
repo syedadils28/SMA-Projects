@@ -198,8 +198,6 @@ Open your browser and navigate to the address shown (usually `http://localhost:3
 
 Use whatever script name is actually defined (`start`, `dev`, `serve`, etc.) — don't assume `npm start` works if it isn't listed.
 
----
-
 ### Important
 
 - Only include a section if its corresponding files/commands genuinely exist in the project.
