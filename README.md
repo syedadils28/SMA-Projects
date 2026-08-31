@@ -64,7 +64,9 @@ Possible status values:
 - 🔵 Completed
 - ⚪ Experimental
 
-## Choose based on repository evidence. If status cannot be determined, use a neutral description such as `Available`.
+Choose based on repository evidence. If status cannot be determined, use a neutral description such as `Available`.
+
+---
 
 ## 🚀 Projects
 
